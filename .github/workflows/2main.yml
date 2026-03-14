@@ -1,0 +1,35 @@
+name: Build Box64 Termux
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ptitSeb/box64
+          ref: v0.4.0
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install cmake ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu -y
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DARM_DYNAREC=ON \
+            -DANDROID=1 \
+            -DBAD_SIGNAL=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja \
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64
+          ninja -j$(nproc)
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: box64-termux-aarch64
+          path: build/box64
