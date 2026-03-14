@@ -1,0 +1,22 @@
+name: Build Box64 Android ARM64
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ptitSeb/box64
+      - name: Install dependencies
+        run: sudo apt install cmake ninja-build -y
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. -DARM_DYNAREC=ON -DANDROID=1 -DBAD_SIGNAL=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
+          ninja -j$(nproc)
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: box64-android-arm64
+          path: build/box64
